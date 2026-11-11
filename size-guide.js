@@ -1,0 +1,8 @@
+(function(root){
+const columns=[['chest_cm','Цээж · см'],['back_cm','Нуруу · см'],['neck_cm','Хүзүү · см'],['inner_width_cm','Дотор өргөн · см'],['inner_length_cm','Дотор урт · см'],['height_cm','Өндөр · см']];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function weight(s){if(s.weight_note)return s.weight_note;const w=s.weight_kg;if(!w)return '—';if(w[1]==null)return w[0]+' кг-аас дээш';if(w[0]===0)return w[1]+' кг хүртэл';if(w[0]===w[1])return '≈ '+w[0]+' кг';return w.join('–')+' кг'}
+function label(s){return [s.size,s.type,...columns.filter(([k])=>s[k]!=null).map(([k,n])=>n.replace(' · см','')+' '+s[k]+' см'),s.weight_kg?weight(s):''].filter(Boolean).join(' · ')}
+function table(p){if(!p.sizes?.length)return '';const cols=columns.filter(([k])=>p.sizes.some(s=>s[k]!=null)),hasWeight=p.sizes.some(s=>s.weight_kg);if(!cols.length&&!hasWeight)return '';return `<div class="tableWrap"><table><thead><tr><th>Хэмжээ</th>${cols.map(([,n])=>'<th>'+n+'</th>').join('')}${hasWeight?'<th>Жингийн баримжаа*</th>':''}</tr></thead><tbody>${p.sizes.map(s=>`<tr><td>${esc(s.size)}</td>${cols.map(([k])=>'<td>'+esc(s[k]??'—')+'</td>').join('')}${hasWeight?'<td>'+esc(weight(s))+'</td>':''}</tr>`).join('')}</tbody></table></div>${p.size_note?'<p class="note">'+esc(p.size_note)+'</p>':''}${hasWeight?'<p class="note">* Нийлүүлэгчийн баримжаа. Бодит бие / сарвууны хэмжээгээр сонгоорой.</p>':''}`}
+const api={weight,label,table};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.PetSizeGuide=api;
+})(typeof window!=='undefined'?window:globalThis);
